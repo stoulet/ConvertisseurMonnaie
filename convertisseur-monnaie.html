@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Cibles du DOM
+            const $euro = $("#euroInput");
+            const $currencyChoice = $("#currencyChoice");
+            const $form = $("#form");
+            const $result = $("#result");
+
+            // Définition de l'URL pour récupération du taux de change
+            const URL = "https://api.ratesapi.io/api/latest";
+
+            // Création de la liste des devises en fonction des données de l'API
+            $.get(URL, function (response) {
+                console.log(response.rates);
+                // Boucle sur l'ensemble des devises
+                for (currencyCode in response.rates) {
+                    console.log(response.rates);
+                    // Création d'une balise option pour chaque devise
+                    var $option = $("<option value=" + response.rates[currencyCode] + ">" + currencyCode + "</option>");
+                    // Ajout de l'option à la liste déroulante
+                    $currencyChoice.append($option);
+                }
+            });
+
+            function calculateChange(even) {
+                // Empêche l'envoi du formulaire
+                even.preventDefault();
+
+                // Récupération de la saisie
+                const amountInEuro = $euro.val();
+                const changeRate = $currencyChoice.val();
+
+                // conversion si les données sont ok
+                if (amountInEuro > 0 && changeRate > 0) {
+                    // Si le taux de change n'est pas null ou égal à zéro
+                    if (changeRate) {
+                        // conversion
+                        const convertedAmount = amountInEuro * changeRate;
+                        // Affichage du résultat
+                        $result.text(convertedAmount.toFixed(2));
+                        $result.css("display","block");
+
+                    } else {
+                        $result.text("Impossible d'obtenir le taux de change");
+                    }
+                } 
+            } 
+
+            // Traitement du formulaire
+            $form.submit(calculateChange);
+        })
+    </script>
+</head>
+
+<body class="container-fluid p-4">
+    <style>
+        #result
+        {
+        display:none;
+        }
+    </style>
+
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <h1>Convertisseur de monnaie</h1>
+
+            <form id="form">
+                <div class="form-group">
+                    <label>Montant en euros</label>
+                    <input type="number" min="1" id="euroInput" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Devise</label>
+                    <select id="currencyChoice" class="form-control">
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block col-3">
+                    Convertir
+                </button>
+            </form>
+
+            <div id="result" class="col-3 mt-3" style="text-align:center; border:1px solid black" ></div>
+
+        </div>
+    </div>
+
+
+</body>
+
+</html>
